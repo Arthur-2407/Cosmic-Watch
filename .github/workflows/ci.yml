@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: |
+          build-cosmic-watch-app/package-lock.json
+          server/package-lock.json
+    
+    - name: Install frontend dependencies
+      run: |
+        cd build-cosmic-watch-app
+        npm ci
+    
+    - name: Install backend dependencies
+      run: |
+        cd server
+        npm ci
+    
+    - name: Lint frontend
+      run: |
+        cd build-cosmic-watch-app
+        npm run lint --if-present
+    
+    - name: Lint backend
+      run: |
+        cd server
+        npm run lint --if-present
+
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'

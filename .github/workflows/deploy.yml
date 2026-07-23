@@ -1,0 +1,137 @@
+name: Deploy Cosmic Watch App
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: |
+          build-cosmic-watch-app/package-lock.json
+          server/package-lock.json
+    
+    - name: Install frontend dependencies
+      run: |
+        cd build-cosmic-watch-app
+        npm ci
+    
+    - name: Install backend dependencies
+      run: |
+        cd server
+        npm ci
+    
+    - name: Run frontend tests
+      run: |
+        cd build-cosmic-watch-app
+        npm run test --if-present
+    
+    - name: Run backend tests
+      run: |
+        cd server
+        npm run test --if-present
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Build and push backend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./server
+        push: true
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/cosmic-watch-backend:latest
+          ${{ secrets.DOCKER_USERNAME }}/cosmic-watch-backend:${{ github.sha }}
+    
+    - name: Build and push frontend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./build-cosmic-watch-app
+        push: true
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/cosmic-watch-frontend:latest
+          ${{ secrets.DOCKER_USERNAME }}/cosmic-watch-frontend:${{ github.sha }}
+    
+    - name: Deploy to production
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /opt/cosmic-watch
+          docker-compose pull
+          docker-compose up -d
+          docker system prune -f
+
+  deploy-pages:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: build-cosmic-watch-app/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd build-cosmic-watch-app
+        npm ci
+    
+    - name: Build
+      run: |
+        cd build-cosmic-watch-app
+        npm run build
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./build-cosmic-watch-app/dist
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
