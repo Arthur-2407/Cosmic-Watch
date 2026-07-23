@@ -5,6 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -16,7 +17,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
         cache-dependency-path: |
           build-cosmic-watch-app/package-lock.json
@@ -60,7 +61,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
     
     - name: Build and push backend image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./server
         push: true
@@ -69,7 +70,7 @@ jobs:
           ${{ secrets.DOCKER_USERNAME }}/cosmic-watch-backend:${{ github.sha }}
     
     - name: Build and push frontend image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./build-cosmic-watch-app
         push: true
@@ -85,8 +86,13 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd /opt/cosmic-watch
-          docker-compose pull
-          docker-compose up -d
+          if command -v docker-compose >/dev/null 2>&1; then
+            docker-compose pull
+            docker-compose up -d
+          else
+            docker compose pull
+            docker compose up -d
+          fi
           docker system prune -f
 
   deploy-pages:
@@ -110,7 +116,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
         cache-dependency-path: build-cosmic-watch-app/package-lock.json
     
