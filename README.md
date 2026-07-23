@@ -31,9 +31,7 @@ A comprehensive Near-Earth Object (NEO) monitoring application built with React,
 
 ### DevOps & Deployment
 - **Docker** & Docker Compose
-- **GitHub Actions** for CI/CD
 - **Nginx** as reverse proxy
-- **GitHub Pages** for frontend hosting
 
 ## 📋 Prerequisites
 
@@ -140,12 +138,6 @@ A comprehensive Near-Earth Object (NEO) monitoring application built with React,
 
 ## 🚀 Deployment
 
-### GitHub Pages (Frontend Only)
-
-1. **Enable GitHub Pages** in repository settings
-2. **Push to main branch** - automatic deployment via GitHub Actions
-3. **Access** at `https://<username>.github.io/<repository>`
-
 ### Docker Production Deployment
 
 1. **Set up production server**
@@ -163,20 +155,6 @@ A comprehensive Near-Earth Object (NEO) monitoring application built with React,
    JWT_SECRET=your-secret-key
    PORT=3001
    ```
-
-### CI/CD Pipeline
-
-The project includes automated CI/CD with GitHub Actions:
-
-- **On push to main**: 
-  - Runs tests and linting
-  - Builds Docker images
-  - Deploys to production
-  - Deploys frontend to GitHub Pages
-
-- **On pull requests**:
-  - Runs tests and security scans
-  - Validates code quality
 
 ## 🔧 Configuration
 
@@ -220,18 +198,22 @@ VITE_NASA_API_KEY=your-nasa-api-key
 │   ├── data.json             # JSON database
 │   └── Dockerfile
 ├── postman/                   # API documentation
-├── .github/workflows/         # CI/CD pipelines
 ├── docker-compose.yml         # Docker orchestration
 └── README.md
 ```
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Commit your changes (`git commit -m 'Add amazing feature'`)
+3. Push the branch to your chosen remote
+4. Share your changes for review
+
+## 👥 Contributors
+
+1. akgupta2025-en
+2. Arthur-2407
+3. ayushk-01-ak
 
 ## 📝 License
 
@@ -246,6 +228,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 For support and questions:
-- Create an issue in the GitHub repository
 - Check the [Postman documentation](postman/README.md) for API usage
 - Review the [deployment guide](#-deployment) for setup issues

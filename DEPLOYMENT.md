@@ -50,43 +50,7 @@ This guide covers various deployment options for the Cosmic Watch application.
    docker run -d -p 80:80 cosmic-watch-frontend
    ```
 
-## 🚀 GitHub Pages Deployment (Frontend Only)
-
-### Automatic Deployment
-
-The project is configured for automatic deployment to GitHub Pages:
-
-1. **Enable GitHub Pages**
-   - Go to repository settings
-   - Navigate to "Pages" section
-   - Select "GitHub Actions" as source
-
-2. **Push to main branch**
-   ```bash
-   git add .
-   git commit -m "Deploy to GitHub Pages"
-   git push origin main
-   ```
-
-3. **Access your deployed app**
-   - URL: `https://<username>.github.io/<repository-name>`
-
-### Manual Deployment
-
-1. **Build the frontend**
-   ```bash
-   cd build-cosmic-watch-app
-   npm install
-   npm run build
-   ```
-
-2. **Deploy to GitHub Pages**
-   ```bash
-   npm install -g gh-pages
-   gh-pages -d dist
-   ```
-
-## 🖥️ Production Server Deployment
+## ️ Production Server Deployment
 
 ### Prerequisites
 - Linux server (Ubuntu 20.04+ recommended)
@@ -106,7 +70,7 @@ The project is configured for automatic deployment to GitHub Pages:
    sudo sh get-docker.sh
    
    # Install Docker Compose
-   sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   sudo curl -L "https://download.docker.com/linux/static/stable/x86_64/docker-compose-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)" -o /usr/local/bin/docker-compose
    sudo chmod +x /usr/local/bin/docker-compose
    ```
 
@@ -208,39 +172,7 @@ The application uses JSON file-based database by default. For production:
    cp /opt/cosmic-watch/server/data.json /opt/cosmic-watch/backups/data_$DATE.json
    ```
 
-## 🔄 CI/CD Pipeline
-
-### GitHub Actions Setup
-
-1. **Repository Secrets**
-   Go to repository settings > Secrets and add:
-   - `DOCKER_USERNAME`: Docker Hub username
-   - `DOCKER_PASSWORD`: Docker Hub password
-   - `HOST`: Production server IP
-   - `USERNAME`: Server username
-   - `SSH_KEY`: Server SSH private key
-
-2. **Automatic Deployment**
-   - Push to `main` branch triggers deployment
-   - Pull requests run tests and security scans
-   - Docker images are built and pushed to Docker Hub
-
-### Manual Deployment Commands
-
-```bash
-# Deploy latest changes
-git pull origin main
-docker-compose pull
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Update specific service
-docker-compose up -d --no-deps backend
-```
-
-## 📊 Monitoring and Maintenance
+##  Monitoring and Maintenance
 
 ### Health Checks
 
@@ -344,4 +276,3 @@ For deployment issues:
 2. Verify environment variables
 3. Ensure all ports are available
 4. Check firewall settings
-5. Review GitHub Actions workflow logs
